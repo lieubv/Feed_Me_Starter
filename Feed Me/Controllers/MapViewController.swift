@@ -35,6 +35,7 @@ import GoogleMaps
 
 class MapViewController: UIViewController {
   
+	@IBOutlet weak var addressLabel: UILabel!
 	@IBOutlet weak var mapView: GMSMapView!
 	@IBOutlet private weak var mapCenterPinImage: UIImageView!
 	@IBOutlet private weak var pinImageVerticalConstraint: NSLayoutConstraint!
@@ -42,11 +43,17 @@ class MapViewController: UIViewController {
   
 	private let locationManager = CLLocationManager()
 	
+	private let dataProvider = GoogleDataProvider()
+	private let searchRadius: Double = 1000
+	
+	
   override func viewDidLoad() {
     super.viewDidLoad()
 	//
 	locationManager.delegate = self as! CLLocationManagerDelegate
 	locationManager.requestWhenInUseAuthorization()
+	//
+	mapView.delegate = self
 	
   }
   
@@ -58,6 +65,54 @@ class MapViewController: UIViewController {
     controller.selectedTypes = searchedTypes
     controller.delegate = self
   }
+	
+	@IBAction func refreshPlaces(_ sender: Any) {
+		searchNearbyPlaces(coordinate: mapView.camera.target)
+	}
+	
+	private func searchNearbyPlaces(coordinate: CLLocationCoordinate2D) {
+		mapView.clear()
+		//
+		dataProvider.fetchPlacesNearCoordinate(coordinate, radius: searchRadius, types: searchedTypes) { places in
+			for place in places {
+				let marker = PlaceMarker(place: place)
+				marker.map = self.mapView
+			}
+		}
+	}
+	
+	private func reverseGeocodeCoordinate(_ coordinate: CLLocationCoordinate2D) {
+		
+		addressLabel.unlock()
+		
+		// 1
+		let geocoder = GMSGeocoder()
+		
+		// 2
+		geocoder.reverseGeocodeCoordinate(coordinate) { response, error in
+			guard let address = response?.firstResult(), let lines = address.lines else {
+				return
+			}
+			
+			// 3
+			self.addressLabel.text = lines.joined(separator: "\n")
+			
+			// 1
+			let labelHeight = self.addressLabel.intrinsicContentSize.height
+			self.mapView.padding = UIEdgeInsets(top: self.view.safeAreaInsets.top,
+												left: 0,
+												bottom: labelHeight,
+												right: 0)
+
+			// 4
+			UIView.animate(withDuration: 0.25) {
+				self.pinImageVerticalConstraint.constant =
+					((labelHeight - self.view.safeAreaInsets.top) * 0.5)
+				self.view.layoutIfNeeded()
+			}
+		}
+	}
+
 }
 
 // MARK: - TypesTableViewControllerDelegate
@@ -65,6 +120,8 @@ extension MapViewController: TypesTableViewControllerDelegate {
   func typesController(_ controller: TypesTableViewController, didSelectTypes types: [String]) {
     searchedTypes = controller.selectedTypes.sorted()
     dismiss(animated: true)
+	//
+	searchNearbyPlaces(coordinate: mapView.camera.target)
   }
 }
 
@@ -93,5 +150,57 @@ extension MapViewController: CLLocationManagerDelegate {
 		// you don’t want to follow a user around
 		// as their initial location is enough for you to work with.
 		locationManager.stopUpdatingLocation()
+		//
+		searchNearbyPlaces(coordinate: location.coordinate)
+	}
+}
+
+// MARK: - GMSMapViewDelegate
+extension MapViewController: GMSMapViewDelegate {
+	func mapView(_ mapView: GMSMapView, idleAt position: GMSCameraPosition) {
+		reverseGeocodeCoordinate(position.target)
+	}
+	
+	func mapView(_ mapView: GMSMapView, willMove gesture: Bool) {
+		addressLabel.lock()
+		//
+		if gesture {
+			mapCenterPinImage.fadeIn(0.25)
+			mapView.selectedMarker = nil
+		}
+	}
+	
+	func mapView(_ mapView: GMSMapView, markerInfoContents marker: GMSMarker) -> UIView? {
+		// 1
+		guard let placeMarker = marker as? PlaceMarker else {
+			return nil
+		}
+		
+		// 2
+		guard let infoView = UIView.viewFromNibName("MarkerInfoView") as? MarkerInfoView else {
+			return nil
+		}
+		// 3
+		infoView.nameLabel.text = placeMarker.place.name
+		
+		// 4
+		if let photo = placeMarker.place.photo {
+			infoView.placePhoto.image = photo
+		} else {
+			infoView.placePhoto.image = UIImage(named: "generic")
+		}
+		
+		return infoView
+	}
+	
+	func mapView(_ mapView: GMSMapView, didTap marker: GMSMarker) -> Bool {
+		mapCenterPinImage.fadeOut(0.25)
+		return false
+	}
+	
+	func didTapMyLocationButton(for mapView: GMSMapView) -> Bool {
+		mapCenterPinImage.fadeIn(0.25)
+		mapView.selectedMarker = nil
+		return false
 	}
 }

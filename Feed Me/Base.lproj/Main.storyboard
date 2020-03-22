@@ -18,17 +18,30 @@
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="7kK-Be-Kq6" customClass="GMSMapView">
                                 <rect key="frame" x="0.0" y="44" width="375" height="623"/>
-                                <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                                <color key="backgroundColor" systemColor="separatorColor" red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.28999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
                             </view>
                             <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="icon_me" translatesAutoresizingMaskIntoConstraints="NO" id="Zk1-KE-lC0">
                                 <rect key="frame" x="172.5" y="300.5" width="30" height="55"/>
                             </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" alpha="0.84999999999999998" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2VQ-Mg-p6u">
+                                <rect key="frame" x="0.0" y="625" width="375" height="42"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="42" id="Idz-tD-q8r"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="r7q-Zb-cJ5" firstAttribute="centerY" secondItem="Zk1-KE-lC0" secondAttribute="bottom" id="2Re-av-h44"/>
+                            <constraint firstItem="r7q-Zb-cJ5" firstAttribute="bottom" secondItem="2VQ-Mg-p6u" secondAttribute="bottom" id="5sl-GC-89j"/>
                             <constraint firstItem="r7q-Zb-cJ5" firstAttribute="bottom" secondItem="7kK-Be-Kq6" secondAttribute="bottom" id="AXo-ef-3ab"/>
+                            <constraint firstItem="r7q-Zb-cJ5" firstAttribute="trailing" secondItem="2VQ-Mg-p6u" secondAttribute="trailing" id="BTI-ed-zhP"/>
                             <constraint firstItem="r7q-Zb-cJ5" firstAttribute="centerX" secondItem="Zk1-KE-lC0" secondAttribute="centerX" id="eEV-hM-eKB"/>
+                            <constraint firstItem="2VQ-Mg-p6u" firstAttribute="leading" secondItem="r7q-Zb-cJ5" secondAttribute="leading" id="jrs-lq-5uq"/>
                             <constraint firstItem="7kK-Be-Kq6" firstAttribute="leading" secondItem="r7q-Zb-cJ5" secondAttribute="leading" id="on2-Na-Lqv"/>
                             <constraint firstItem="7kK-Be-Kq6" firstAttribute="top" secondItem="r7q-Zb-cJ5" secondAttribute="top" id="sPp-xT-tbo"/>
                             <constraint firstItem="r7q-Zb-cJ5" firstAttribute="trailing" secondItem="7kK-Be-Kq6" secondAttribute="trailing" id="xRM-b3-car"/>
@@ -37,6 +50,11 @@
                     </view>
                     <navigationItem key="navigationItem" id="6Hq-pz-3QM">
                         <nil key="title"/>
+                        <barButtonItem key="leftBarButtonItem" title="Refresh" image="arrow.clockwise" catalog="system" id="GSb-xO-Z3f">
+                            <connections>
+                                <action selector="refreshPlaces:" destination="vXZ-lx-hvc" id="Z0V-0d-iKo"/>
+                            </connections>
+                        </barButtonItem>
                         <barButtonItem key="rightBarButtonItem" image="filter" id="Y8r-sI-zD8">
                             <connections>
                                 <segue destination="gRK-9k-5jK" kind="presentation" identifier="Types Segue" id="Glz-Sc-CwV"/>
@@ -44,6 +62,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="addressLabel" destination="2VQ-Mg-p6u" id="p5L-qZ-rHW"/>
                         <outlet property="mapCenterPinImage" destination="Zk1-KE-lC0" id="Dfo-xZ-1yc"/>
                         <outlet property="mapView" destination="7kK-Be-Kq6" id="rXB-Oz-NkJ"/>
                         <outlet property="pinImageVerticalConstraint" destination="2Re-av-h44" id="KIp-HD-OAI"/>
@@ -135,6 +154,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="arrow.clockwise" catalog="system" width="56" height="64"/>
         <image name="filter" width="25" height="25"/>
         <image name="icon_me" width="30" height="55"/>
     </resources>
